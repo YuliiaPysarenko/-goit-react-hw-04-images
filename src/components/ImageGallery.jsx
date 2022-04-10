@@ -19,44 +19,45 @@ export default function ImageGallery(props) {
   const [key, setKey] = useState("24634494-a9c983226c04769a6e409a37a");
   const [images, setImages] = useState([]);
   const [totalImagesAmount, setTotalImagesAmount] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [largeImage, setLargeImage] = useState("");
   const [tags, setTags] = useState("");
 
-  useEffect(() => {
-    const getImages = async () => {
-      setIsLoading(true);
-      
-      const response = await axios.get(
-        `/?q=${props.request}&page=${page}&key=${key}&image_type=photo&orientation=horizontal&per_page=12`
-      );
-      setTotalImagesAmount(response.data.total);
+  const getImages = async () => {
+    setLoading(true);
+    
+    const response = await axios.get(
+      `/?q=${props.request}&page=${page}&key=${key}&image_type=photo&orientation=horizontal&per_page=12`
+    );
+    setTotalImagesAmount(response.data.total);
+    if(page === 1) {
+      setImages([]);
       setImages([...response.data.hits]);
+    } else {
+      setImages([...images, ...response.data.hits]);
     }
+    
+  }
 
-    setPage(1);
-    getImages()
-    .catch(console.error)
-    .finally(setIsLoading(false))
+  useEffect(() => {
+    if (props.request) {
+      setPage(1);
+      getImages()
+      .then(window.scrollTo(0, 0))
+      .catch(console.error)
+      .finally(setLoading(false))
+    }
 
   }, [props.request]);
 
   useEffect(() => {
-    const getImages = async () => {
-      setIsLoading(true);
-
-      const response = await axios.get(
-        `/?q=${props.request}&page=${page}&key=${key}&image_type=photo&orientation=horizontal&per_page=12`
-      );
-      setTotalImagesAmount(response.data.total);
-      setImages([...images, ...response.data.hits]);
+    if (props.request) {
+      getImages()
+      .catch(console.error)
+      .finally(setLoading(false))
     }
-
-    getImages()
-    .catch(console.error)
-    .finally(setIsLoading(false))
 
   }, [page]);
 
@@ -104,11 +105,11 @@ export default function ImageGallery(props) {
           {totalImagesAmount > 12 ? (
             <Button onClickLoadMore={onClickLoadMore} />
           ) : null}
-          {isLoading && (
+          {isLoading ? (
             <div className="Loader">
               <Oval color="#00BFFF" height={80} width={80} />
             </div>
-          )}
+          ) : null}
           {isModalOpen ? (
             <Modal
               handleModalOpen={handleModalOpen}

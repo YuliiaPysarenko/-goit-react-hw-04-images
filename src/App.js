@@ -8,10 +8,10 @@ import ImageGallery from "./components/ImageGallery";
 axios.defaults.baseURL = "https://pixabay.com/api";
 
 export default function App() {
-  const [request, setRequest] = useState("test");
+  const [request, setRequest] = useState("");
 
   const formSubmitHandler = (data) => {
-    setRequest(data.searchRequest);
+    setRequest(data);
   };
 
     return (
